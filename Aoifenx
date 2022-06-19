@@ -1,0 +1,123 @@
+if game.PlaceId == 155615604 then
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("Aoifenx Prison Life", "Ocean")
+
+-- MAIN
+local Main = Window:NewTab("Main")
+local MainSection = Main:NewSection("Main")
+MainSection:NewLabel("Main")
+MainSection:NewDropdown("Give Gun", "Gives the localplayer a gun", {"M9", "Remington 870", "AK-47"}, function(v)
+    local A_1 = game:GetService("Workspace")["Prison_ITEMS"].giver[v].ITEMPICKUP
+    local Event = game:GetService("Workspace").Remote.ItemHandler
+    Event:InvokeServer(A_1)
+end)
+
+
+MainSection:NewDropdown("Gun Mod", "Makes the gun op", {"M9", "Remington 870", "AK-47"}, function(v)
+    local module = nil
+    if game:GetService("Players").LocalPlayer.Backpack:FindFirstChild(v) then
+        module = require(game:GetService("Players").LocalPlayer.Backpack[v].GunStates)
+    elseif game:GetService("Players").LocalPlayer.Character:FindFirstChild(v) then
+        module = require(game:GetService("Players").LocalPlayer.Character[v].GunStates)
+    end
+    if module ~= nil then
+        module["MaxAmmo"] = math.huge
+        module["CurrentAmmo"] = math.huge
+        module["StoredAmmo"] = math.huge
+        module["FireRate"] = 0.000001
+        module["Spread"] = 0
+        module["Range"] = math.huge
+        module["Bullets"] = 10
+        module["ReloadTime"] = 0.000001
+        module["AutoFire"] = true
+    end
+end)
+
+-- PLAYER
+local Player = Window:NewTab("Player")
+local PlayerSection = Player:NewSection("Player")
+PlayerSection:NewLabel("Player")
+PlayerSection:NewSlider("Walkspeed", "Changes the walkspeed", 150, 16, function(v)
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = v
+end)
+PlayerSection:NewSlider("Jumppower", "Changes the jumppower", 150, 50, function(v)
+    game.Players.LocalPlayer.Character.Humanoid.JumpPower = v
+end)
+end
+
+
+-- TELEPORTATION
+local Teleportation = Window:NewTab("Teleportation")
+local TeleportationSection = Teleportation:NewSection("Teleportation")
+TeleportationSection:NewButton("Teleport", "Teleports the localplayer to the desired location", function(v)
+end)
+
+
+-- FLY
+local Fly = Window:NewTab("Fly")
+local FlySection = Fly:NewSection("Fly")
+FlySection:NewLabel("Fly into the air.")
+FlySection:NewButton("Fly", "Fly everywhere into the air.", function(v)
+local UIS = game:GetService("UserInputService")
+
+local last = tick()
+local isFlying = false
+local flyUpSpeed = 16
+local flyDownSpeed = 16
+
+local char = script.Parent
+local root = char:WaitForChild("HumanoidRootPart")
+
+function flight(isFlying)
+    if isFlying then
+        local bv = Instance.new("BodyVelocity")
+        bv.MaxForce = Vector3.new(0,1,0)* 30000
+        bv.Velocity = Vector3.new(0,0,0)
+        bv.Name = "FlightVelocity"
+        bv.Parent = root
+    else
+        local bv = root:FindFirstChild("FlightVelocity")
+        if bv then bv:Destroy() end
+    end
+end
+
+UIS.InputBegan:Connect(function(input,gameprocessed)
+    if gameprocessed then return end
+
+    if input.KeyCode == Enum.KeyCode.Space then
+        if (tick() - last) < 0.5 then
+            isFlying = not isFlying
+            flight(isFlying)
+        elseif isFlying then
+            local bv = root:FindFirstChild("FlightVelocity")
+            if bv then bv.Velocity = Vector3.new(0,1,0)* flyUpSpeed end
+        end
+        last = tick()
+    end
+
+    if input.KeyCode == Enum.KeyCode.LeftControl then
+        if isFlying then
+            local bv = root:FindFirstChild("FlightVelocity")
+            if bv then bv.Velocity = Vector3.new(0,-1,0)* flyDownSpeed end
+        end
+    end
+end)
+
+UIS.InputEnded:Connect(function(input,gameprocessed)
+    if gameprocessed then return end
+
+    if input.KeyCode == Enum.KeyCode.Space or input.KeyCode == Enum.KeyCode.LeftControl then
+        if isFlying then
+            local bv = root:FindFirstChild("FlightVelocity")
+            if bv then bv.Velocity = Vector3.new(0,0,0) end
+        end
+    end
+end)
+end)
+
+-- CREDITS
+local Credits = Window:NewTab("Credits")
+local CreditsSection = Credits:NewSection("Credits")
+CreditsSection:NewLabel("Credits")
+CreditsSection:NewTextBox("Credits to the original owners for helping me learn how to make this script (Zerio), (Hercules Exploitz)", "Credits", function(txt)
+end)
